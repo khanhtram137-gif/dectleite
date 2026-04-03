@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>The Chromatic Data Lab | Visualizer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .headline { font-family: 'Space Grotesk', sans-serif; }
+        .label-specimen { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; }
+        
+        .bubble {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 9999px;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            cursor: pointer;
+            position: absolute;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+            z-index: 50 !important;
+        }
+
+        .bubble-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0f52ba",
+                        secondary: "#ff1493",
+                        tertiary: "#93dc5c",
+                        background: "#f8fafc",
+                        surface: "#ffffff",
+                        "on-surface": "#0f172a",
+                        outline: "#64748b"
+                    },
+                    fontFamily: {
+                        headline: ["Space Grotesk"],
+                        body: ["Inter"]
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="text-on-surface overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-8 h-20 w-full fixed top-0 z-50 bg-white border-b border-slate-200">
+<div class="text-2xl font-black tracking-tighter text-primary font-headline uppercase" style="">
+        The 경하 Data Lab
+    </div>
+<nav class="hidden md:flex items-center space-x-8">
+<a class="font-headline tracking-tight font-bold uppercase text-primary border-b-2 border-primary pb-1" href="#" style="">Lab</a>
+<a class="font-headline tracking-tight font-bold uppercase text-slate-400 hover:text-primary transition-colors" href="#" style="">Insights</a>
+<a class="font-headline tracking-tight font-bold uppercase text-slate-400 hover:text-primary transition-colors" href="#" style="">Archives</a>
+</nav>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer transition-transform" style="">notifications</span>
+<span class="material-symbols-outlined text-slate-500 hover:text-primary cursor-pointer transition-transform" style="">account_circle</span>
+</div>
+</header>
+<div class="flex pt-20 h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 bg-slate-50 flex flex-col py-6 gap-2 border-r border-slate-200">
+<div class="px-6 mb-8">
+<div class="text-lg font-bold text-slate-800 font-headline tracking-widest uppercase" style="">Visualizer v1.0</div>
+<div class="text-[10px] text-slate-500 font-medium tracking-widest uppercase mt-1" style="">Active Session</div>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center gap-4 px-6 py-3 bg-white text-primary border-r-4 border-primary translate-x-px transition-all cursor-pointer">
+<span class="material-symbols-outlined" style="">bubble_chart</span>
+<span class="font-headline text-sm font-medium tracking-widest uppercase" style="">Distribution</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-slate-500 hover:text-primary hover:bg-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" style="">analytics</span>
+<span class="font-headline text-sm font-medium tracking-widest uppercase" style="">Variables</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-slate-500 hover:text-primary hover:bg-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" style="">tune</span>
+<span class="font-headline text-sm font-medium tracking-widest uppercase" style="">Filters</span>
+</div>
+<div class="flex items-center gap-4 px-6 py-3 text-slate-500 hover:text-primary hover:bg-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" style="">settings</span>
+<span class="font-headline text-sm font-medium tracking-widest uppercase" style="">Settings</span>
+</div>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full py-4 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity" style="">
+                Export Analysis
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 relative bg-background overflow-hidden">
+<div class="relative h-full flex flex-col p-8 overflow-hidden">
+<!-- Header Stats -->
+<div class="flex justify-between items-start mb-6">
+<div>
+<h1 class="headline text-4xl font-bold tracking-tighter text-slate-900 mb-1 uppercase" style="">DUPLICATE FILE MAP</h1>
+<p class="body text-slate-500 text-sm max-w-md" style="">Comprehensive visualization of all 20 character dataset groups mapped by file count.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-white p-3 px-5 rounded-lg text-center shadow-sm border border-slate-100">
+<div class="label-specimen text-[10px] text-slate-400 mb-1" style="">Total Groups</div>
+<div class="headline text-xl font-bold text-slate-900" style="">20</div>
+</div>
+<div class="bg-white p-3 px-5 rounded-lg text-center border-b-2 border-secondary shadow-sm">
+<div class="label-specimen text-[10px] text-secondary mb-1" style="">Peak Cluster</div>
+<div class="headline text-xl font-bold text-slate-900" style="">Group 1</div>
+</div>
+</div>
+</div>
+<!-- Dynamic Bubble Canvas -->
+<div class="flex-1 bg-white rounded-2xl shadow-inner border border-slate-200 overflow-hidden relative">
+<div class="bubble-container">
+<!-- Group 1: 20 files -->
+<div class="bubble w-52 h-52 bg-[#f43f5e] text-white z-20" style="top: 25%; left: 35%;">
+<span class="label-specimen text-[10px] opacity-80" style="">G1</span>
+<span class="headline text-base font-bold px-6 leading-tight" style="">HSK / BH / BT / Sách</span>
+<span class="headline text-4xl font-bold mt-2" style="">20</span>
+</div>
+<!-- Group 2: 17 files -->
+<div class="bubble w-48 h-48 bg-[#3b82f6] text-white z-10" style="top: 40%; left: 48%;">
+<span class="label-specimen text-[10px] opacity-80" style="">G2</span>
+<span class="headline text-base font-bold px-4" style="">AVT-</span>
+<span class="headline text-3xl font-bold mt-1" style="">17</span>
+</div>
+<!-- Group 3: 15 files -->
+<div class="bubble w-44 h-44 bg-[#8b5cf6] text-white z-20" style="top: 15%; left: 52%;">
+<span class="label-specimen text-[10px] opacity-80" style="">G3</span>
+<span class="headline text-sm font-bold px-4" style="">종합디자인사</span>
+<span class="headline text-3xl font-bold mt-1" style="">15</span>
+</div>
+<!-- Group 4: 12 files -->
+<div class="bubble w-40 h-40 bg-[#10b981] text-white z-10" style="top: 55%; left: 30%;">
+<span class="label-specimen text-[10px] opacity-80" style="">G4</span>
+<span class="headline text-xs font-bold px-4 uppercase" style="">DS1-P1-Stylized</span>
+<span class="headline text-2xl font-bold mt-1" style="">12</span>
+</div>
+<!-- Group 5: 10 files -->
+<div class="bubble w-36 h-36 bg-[#f59e0b] text-white z-30" style="top: 38%; left: 22%;">
+<span class="label-specimen text-[10px] opacity-80" style="">G5</span>
+<span class="headline text-xs font-bold px-4" style="">MOVIE NIGHT</span>
+<span class="headline text-2xl font-bold mt-1" style="">10</span>
+</div>
+<!-- Group 6: 9 files -->
+<div class="bubble w-32 h-32 bg-[#ec4899] text-white z-20" style="top: 18%; left: 25%;">
+<span class="label-specimen text-[10px] opacity-80" style="">G6</span>
+<span class="headline text-[10px] font-bold px-4" style="">Coffee Phin Typography</span>
+<span class="headline text-xl font-bold mt-1" style="">9</span>
+</div>
+<!-- Group 7: 8 files -->
+<div class="bubble w-32 h-32 bg-[#06b6d4] text-white z-10" style="top: 58%; left: 55%;">
+<span class="label-specimen text-[9px] opacity-80" style="">G7</span>
+<span class="headline text-[10px] font-bold px-3" style="">경하 / 발표</span>
+<span class="headline text-lg font-bold" style="">8</span>
+</div>
+<!-- Group 8: 7 files -->
+<div class="bubble w-28 h-28 bg-[#6366f1] text-white z-20" style="top: 45%; left: 15%;">
+<span class="label-specimen text-[8px] opacity-80" style="">G8</span>
+<span class="headline text-[9px] font-bold px-2" style="">Ver1 / Ver2 / Ver3</span>
+<span class="headline text-lg font-bold" style="">7</span>
+</div>
+<!-- Group 9: 7 files -->
+<div class="bubble w-28 h-28 bg-[#84cc16] text-white z-20" style="top: 65%; left: 42%;">
+<span class="label-specimen text-[8px] opacity-80" style="">G9</span>
+<span class="headline text-[9px] font-bold px-2" style="">Final Assignment</span>
+<span class="headline text-lg font-bold" style="">7</span>
+</div>
+<!-- Group 10: 7 files -->
+<div class="bubble w-28 h-28 bg-[#f97316] text-white z-30" style="top: 10%; left: 40%;">
+<span class="label-specimen text-[8px] opacity-80" style="">G10</span>
+<span class="headline text-[10px] font-bold" style="">Bitmap</span>
+<span class="headline text-lg font-bold" style="">7</span>
+</div>
+<!-- Group 11: 6 files -->
+<div class="bubble w-24 h-24 bg-[#a855f7] text-white z-10" style="top: 75%; left: 30%;">
+<span class="label-specimen text-[8px] opacity-80" style="">G11</span>
+<span class="headline text-[8px] font-bold px-2" style="">Typography Editorial</span>
+<span class="headline text-base font-bold" style="">6</span>
+</div>
+<!-- Group 12: 6 files -->
+<div class="bubble w-24 h-24 bg-[#14b8a6] text-white z-10" style="top: 30%; left: 65%;">
+<span class="label-specimen text-[8px] opacity-80" style="">G12</span>
+<span class="headline text-[9px] font-bold px-1" style="">2D Foundation</span>
+<span class="headline text-base font-bold" style="">6</span>
+</div>
+<!-- Group 13: 6 files -->
+<div class="bubble w-24 h-24 bg-[#db2777] text-white z-20" style="top: 50%; left: 70%;">
+<span class="label-specimen text-[8px] opacity-80" style="">G13</span>
+<span class="headline text-[9px] font-bold" style="">미술사</span>
+<span class="headline text-base font-bold" style="">6</span>
+</div>
+<!-- Group 14: 5 files -->
+<div class="bubble w-20 h-20 bg-[#64748b] text-white z-10" style="top: 20%; left: 15%;">
+<span class="label-specimen text-[7px] opacity-80" style="">G14</span>
+<span class="headline text-[8px] font-bold" style="">Grid Fonts</span>
+<span class="headline text-sm font-bold" style="">5</span>
+</div>
+<!-- Group 15: 5 files -->
+<div class="bubble w-20 h-20 bg-[#fbbf24] text-white z-30" style="top: 10%; left: 65%;">
+<span class="label-specimen text-[7px] opacity-80" style="">G15</span>
+<span class="headline text-[8px] font-bold" style="">Namecard_Opt</span>
+<span class="headline text-sm font-bold" style="">5</span>
+</div>
+<!-- Group 16: 5 files -->
+<div class="bubble w-20 h-20 bg-[#ef4444] text-white z-10" style="top: 70%; left: 68%;">
+<span class="label-specimen text-[7px] opacity-80" style="">G16</span>
+<span class="headline text-[9px] font-bold" style="">1P1D</span>
+<span class="headline text-sm font-bold" style="">5</span>
+</div>
+<!-- Group 17: 5 files -->
+<div class="bubble w-20 h-20 bg-[#2dd4bf] text-white z-20" style="top: 75%; left: 18%;">
+<span class="label-specimen text-[7px] opacity-80" style="">G17</span>
+<span class="headline text-[9px] font-bold" style="">소책자</span>
+<span class="headline text-sm font-bold" style="">5</span>
+</div>
+<!-- Group 18: 4 files -->
+<div class="bubble w-16 h-16 bg-[#a78bfa] text-white z-10" style="top: 80%; left: 50%;">
+<span class="label-specimen text-[6px] opacity-80" style="">G18</span>
+<span class="headline text-[7px] font-bold" style="">Milk Latte</span>
+<span class="headline text-xs font-bold" style="">4</span>
+</div>
+<!-- Group 19: 4 files -->
+<div class="bubble w-16 h-16 bg-[#fb7185] text-white z-30" style="top: 35%; left: 80%;">
+<span class="label-specimen text-[6px] opacity-80" style="">G19</span>
+<span class="headline text-[6px] font-bold leading-tight px-1 uppercase" style="">Beauty Dishes</span>
+<span class="headline text-xs font-bold" style="">4</span>
+</div>
+<!-- Group 20: 4 files -->
+<div class="bubble w-16 h-16 bg-[#34d399] text-white z-20" style="top: 60%; left: 10%;">
+<span class="label-specimen text-[6px] opacity-80" style="">G20</span>
+<span class="headline text-[8px] font-bold" style="">Câu 2</span>
+<span class="headline text-xs font-bold" style="">4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating FAB -->
+<button class="fixed bottom-10 right-10 w-16 h-16 bg-secondary rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 hover:rotate-90 transition-all duration-300" style="">
+<span class="material-symbols-outlined text-3xl" style="">add</span>
+</button>
+</main>
+</div>
+</body></html>
